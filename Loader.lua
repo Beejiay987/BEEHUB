@@ -1,36 +1,26 @@
-if not game:IsLoaded() then
-    game.Loaded:Wait()
+if not getgenv().SCRIPT_KEY then
+    return warn("Key not verified")
 end
 
-local Junkie = loadstring(game:HttpGet(
-"https://jnkie.com/sdk/library.lua"
-))()
-
-Junkie.service = "BeeHuB"
-Junkie.identifier = "1075194"
-Junkie.provider = "BeeHuB"
-
-local result = Junkie.check_key()
-
-if not result or not result.valid then
-    Junkie.get_key_link()
-    return warn("Invalid key")
-end
-
-getgenv().SCRIPT_KEY = result.key
-
--- loader signature (anti hotlink)
-local LOADER_SIGNATURE = "BeeHuB_SECURE_v1"
+local VERSION = "1.0"
+local SIGNATURE = "BeeHuB_SECURE_v1"
 
 local endpoint =
 "https://bee-hu-b-core.vercel.app/api/main"
-.. "?key=" .. result.key
-.. "&loader=" .. LOADER_SIGNATURE
+.. "?key=" .. getgenv().SCRIPT_KEY
+.. "&loader=" .. SIGNATURE
+.. "&version=" .. VERSION
 
-local success, err = pcall(function()
-    loadstring(game:HttpGet(endpoint))()
+local success, result = pcall(function()
+    return game:HttpGet(endpoint)
 end)
 
 if not success then
-    warn("BeeHuB Core load failed:", err)
+    return warn("Loader request failed")
 end
+
+if result == "OUTDATED_LOADER" then
+    return warn("Please update BeeHuB loader")
+end
+
+loadstring(result)()
